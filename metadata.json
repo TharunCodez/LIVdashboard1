@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Smart Farmer Dashboard",
+  "description": "A real-time agricultural monitoring dashboard featuring reservoir levels, sensor data, and equipment status updates via WebSockets.",
+  "requestFramePermissions": []
+}
