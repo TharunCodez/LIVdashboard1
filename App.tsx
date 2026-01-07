@@ -137,8 +137,8 @@ const App: React.FC = () => {
   const ws = useRef<WebSocket | null>(null);
 
   const connectWebSocket = useCallback(() => {
-    const WS_URL = import.meta.env.VITE_WS_URL;
-    const socket = new WebSocket(WS_URL);
+
+    const socket = new WebSocket("wss://livdashboard1.onrender.com");
 
 
     socket.onopen = () => {
