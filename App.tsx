@@ -23,7 +23,7 @@ const Header = () => (
   <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 sticky top-0 z-10">
     <div className="flex items-center gap-2">
       <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-gray-100">
-        <img src="logo.png" alt="LIV Logo" className="w-full h-full object-contain" />
+        <img src="/logo.png" alt="LIV Logo" className="w-full h-full object-contain" />
       </div>
       <h1 className="text-2xl font-black tracking-tighter text-black">LIV</h1>
     </div>
