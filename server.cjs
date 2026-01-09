@@ -1,61 +1,73 @@
-
-const { WebSocketServer } = require('ws');
-const http = require('http');
+const http = require("http");
+const { WebSocketServer } = require("ws");
 
 const PORT = process.env.PORT || 8080;
 
-const server = http.createServer((req, res) => {
-  res.writeHead(200);
-  res.end('WebSocket Server is running');
-});
-
-const wss = new WebSocketServer({ server });
-
-// Mock state
+// ---- In-memory live state ----
 let currentData = {
   deviceID: "AVF001LIV01",
-  temperature: 31.8,
-  humidity: 52.8,
-  soilMoisture: 9,
+  temperature: 0,
+  humidity: 0,
+  soilMoisture: 0,
   rain: false,
-  reservoir: 82,
+  reservoir: 0,
   valve: false,
   pump: false
 };
 
-wss.on('connection', (ws) => {
-  console.log('Client connected');
+// ---- HTTP server (for hardware POST) ----
+const server = http.createServer((req, res) => {
+  if (req.method === "POST" && req.url === "/update") {
+    let body = "";
 
-  // Send initial data to the new client
-  ws.send(JSON.stringify(currentData));
+    req.on("data", chunk => {
+      body += chunk.toString();
+    });
 
-  ws.on('message', (message) => {
-    try {
-      const parsed = JSON.parse(message);
-      // If we receive data from a device, update state and broadcast
-      if (parsed.deviceID) {
-        currentData = { ...currentData, ...parsed };
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+
+        if (!payload.deviceID) {
+          res.writeHead(400);
+          return res.end("deviceID missing");
+        }
+
+        currentData = { ...currentData, ...payload };
         broadcast(currentData);
-      }
-    } catch (e) {
-      console.error('Invalid message format', e);
-    }
-  });
 
-  ws.on('close', () => console.log('Client disconnected'));
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "ok" }));
+      } catch (err) {
+        res.writeHead(400);
+        res.end("Invalid JSON");
+      }
+    });
+  } else {
+    res.writeHead(200);
+    res.end("Backend running");
+  }
 });
 
+// ---- WebSocket ----
+const wss = new WebSocketServer({ server });
+
+wss.on("connection", ws => {
+  console.log("WebSocket client connected");
+  ws.send(JSON.stringify(currentData));
+});
+
+// ---- Broadcast helper ----
 function broadcast(data) {
-  wss.clients.forEach((client) => {
-    if (client.readyState === 1) { // OPEN
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) {
       client.send(JSON.stringify(data));
     }
   });
 }
 
-
-
+// ---- Start server ----
 server.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
-  console.log(`WebSocket server active on ws://localhost:${PORT}`);
+  console.log(`HTTP  : https://livdashboard1.onrender.com`);
+  console.log(`WS    : wss://livdashboard1.onrender.com`);
 });

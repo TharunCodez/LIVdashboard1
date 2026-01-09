@@ -180,22 +180,6 @@ const App: React.FC = () => {
     };
   }, [connectWebSocket]);
 
-  useEffect(() => {
-    if (!isConnected) {
-      const interval = setInterval(() => {
-        setData(prev => ({
-          ...prev,
-          temperature: +(30 + Math.random() * 5).toFixed(1),
-          humidity: +(60 + Math.random() * 15).toFixed(1),
-          soilMoisture: +(40 + Math.random() * 30).toFixed(0),
-          reservoir: Math.max(0, Math.min(100, prev.reservoir + (Math.random() > 0.5 ? 1 : -1))),
-          rain: Math.random() > 0.9,
-        }));
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [isConnected]);
-
   return (
     <div className="pb-24 min-h-screen bg-[#FDFDFD] max-w-4xl mx-auto shadow-2xl relative">
       <Header />
